@@ -96,7 +96,7 @@ const CountryInput = () => {
   return (
     <fieldset>
       <legend>
-        <label htmlFor={`${uid}country`}>Countri</label>
+        <label htmlFor={`${uid}country`}>Country</label>
       </legend>
       <Select
         inputId={`${uid}country`}
