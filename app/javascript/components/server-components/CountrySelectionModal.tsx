@@ -8,6 +8,7 @@ import { register } from "$app/utils/serverComponentUtil";
 import { Button } from "$app/components/Button";
 import { Modal } from "$app/components/Modal";
 import { Progress } from "$app/components/Progress";
+import { Select, Option } from "$app/components/Select";
 
 type Props = {
   country: string | null;
@@ -25,6 +26,17 @@ export const CountrySelectionModal = ({ country: initialCountry, countries }: Pr
   ];
   const [checked, setChecked] = React.useState<number[]>([]);
   const [error, setError] = React.useState("");
+
+  const countryOptions: Option[] = React.useMemo(
+    () =>
+      Object.entries(countries).map(([code, name]) => ({
+        id: code,
+        label: name,
+      })),
+    [countries],
+  );
+
+  const selectedCountryOption = countryOptions.find((option) => option.id === country) || null;
 
   const save = async () => {
     setSaving(true);
@@ -63,13 +75,22 @@ export const CountrySelectionModal = ({ country: initialCountry, countries }: Pr
             <legend>
               <label htmlFor={`${uid}country`}>Country</label>
             </legend>
-            <select id={`${uid}country`} value={country} onChange={(e) => setCountry(e.target.value)} disabled={saving}>
-              {Object.entries(countries).map(([code, name]) => (
-                <option key={code} value={code}>
-                  {name}
-                </option>
-              ))}
-            </select>
+            <Select
+              inputId={`${uid}country`}
+              value={selectedCountryOption}
+              onChange={(selectedOption) => {
+                if (selectedOption && !Array.isArray(selectedOption)) {
+                  setCountry(selectedOption.id);
+                }
+              }}
+              options={countryOptions}
+              isDisabled={saving}
+              placeholder="Search for a country..."
+              isClearable={false}
+              isSearchable
+              isMulti={false}
+              maxMenuHeight={200}
+            />
             {error ? <small>{error}</small> : null}
           </fieldset>
           <fieldset>

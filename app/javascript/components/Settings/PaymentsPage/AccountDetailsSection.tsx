@@ -1,10 +1,12 @@
 import cx from "classnames";
 import { CountryCode, parsePhoneNumber } from "libphonenumber-js";
 import * as React from "react";
+import { MultiValue, SingleValue } from "react-select";
 import { cast } from "ts-safe-cast";
 
 import { Button } from "$app/components/Button";
 import { Icon } from "$app/components/Icons";
+import { Select, Option } from "$app/components/Select";
 import {
   ComplianceInfo,
   FormFieldName,
@@ -48,6 +50,107 @@ const AccountDetailsSection = ({
   payoutMethod: PayoutMethod;
 }) => {
   const uid = React.useId();
+
+  const handleStringChange =
+    (update: (value: string | null) => void) => (newValue: SingleValue<Option> | MultiValue<Option>) => {
+      if (newValue && "id" in newValue) {
+        update(newValue.id);
+      } else {
+        update(null);
+      }
+    };
+
+  const handleNumericChange =
+    (update: (value: number) => void) => (newValue: SingleValue<Option> | MultiValue<Option>) => {
+      if (newValue && "id" in newValue) {
+        update(Number(newValue.id));
+      }
+    };
+
+  const countryOptions: Option[] = React.useMemo(
+    () => Object.entries(countries).map(([code, name]) => ({ id: code, label: name })),
+    [countries],
+  );
+
+  const uaeBusinessTypeOptions: Option[] = React.useMemo(
+    () => uaeBusinessTypes.map((bt) => ({ id: bt.code, label: bt.name })),
+    [uaeBusinessTypes],
+  );
+
+  const indiaBusinessTypeOptions: Option[] = React.useMemo(
+    () => indiaBusinessTypes.map((bt) => ({ id: bt.code, label: bt.name })),
+    [indiaBusinessTypes],
+  );
+
+  const canadaBusinessTypeOptions: Option[] = React.useMemo(
+    () => canadaBusinessTypes.map((bt) => ({ id: bt.code, label: bt.name })),
+    [canadaBusinessTypes],
+  );
+
+  const genericBusinessTypeOptions: Option[] = React.useMemo(
+    () => [
+      { id: "llc", label: "LLC" },
+      { id: "partnership", label: "Partnership" },
+      { id: "profit", label: "Non Profit" },
+      { id: "sole_proprietorship", label: "Sole Proprietorship" },
+      { id: "corporation", label: "Corporation" },
+    ],
+    [],
+  );
+
+  const usStateOptions: Option[] = React.useMemo(
+    () => states.us.map((s) => ({ id: s.code, label: s.name })),
+    [states.us],
+  );
+
+  const caStateOptions: Option[] = React.useMemo(
+    () => states.ca.map((s) => ({ id: s.code, label: s.name })),
+    [states.ca],
+  );
+
+  const auStateOptions: Option[] = React.useMemo(
+    () => states.au.map((s) => ({ id: s.code, label: s.name })),
+    [states.au],
+  );
+
+  const mxStateOptions: Option[] = React.useMemo(
+    () => states.mx.map((s) => ({ id: s.code, label: s.name })),
+    [states.mx],
+  );
+
+  const aeStateOptions: Option[] = React.useMemo(
+    () => states.ae.map((s) => ({ id: s.code, label: s.name })),
+    [states.ae],
+  );
+
+  const ieStateOptions: Option[] = React.useMemo(
+    () => states.ir.map((s) => ({ id: s.code, label: s.name })),
+    [states.ir],
+  );
+
+  const brStateOptions: Option[] = React.useMemo(
+    () => states.br.map((s) => ({ id: s.code, label: s.name })),
+    [states.br],
+  );
+
+  const monthOptions: Option[] = React.useMemo(
+    () => Array.from({ length: 12 }, (_, i) => ({ id: String(i + 1), label: String(i + 1) })),
+    [],
+  );
+
+  const dayOptions: Option[] = React.useMemo(
+    () => Array.from({ length: 31 }, (_, i) => ({ id: String(i + 1), label: String(i + 1) })),
+    [],
+  );
+
+  const yearOptions: Option[] = React.useMemo(
+    () =>
+      Array.from({ length: minDobYear - 1900 }, (_, i) => ({
+        id: String(i + 1900),
+        label: String(i + 1900),
+      })).reverse(),
+    [minDobYear],
+  );
 
   const formatPhoneNumber = (phoneNumber: string, country_code: string | null) => {
     try {
@@ -131,69 +234,49 @@ const AccountDetailsSection = ({
                 <label htmlFor={`${uid}-business-type`}>Type</label>
               </legend>
               {complianceInfo.business_country === "AE" ? (
-                <select
-                  id={`${uid}-business-type`}
+                <Select
+                  inputId={`${uid}-business-type`}
                   required={complianceInfo.is_business}
-                  disabled={isFormDisabled}
+                  isDisabled={isFormDisabled}
                   aria-invalid={errorFieldNames.has("business_type")}
-                  value={complianceInfo.business_type || "Type"}
-                  onChange={(evt) => updateComplianceInfo({ business_type: evt.target.value })}
-                >
-                  <option disabled>Type</option>
-                  {uaeBusinessTypes.map((businessType) => (
-                    <option key={businessType.code} value={businessType.code}>
-                      {businessType.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Type"
+                  value={uaeBusinessTypeOptions.find((o) => o.id === complianceInfo.business_type) ?? null}
+                  onChange={handleStringChange((value) => updateComplianceInfo({ business_type: value }))}
+                  options={uaeBusinessTypeOptions}
+                />
               ) : complianceInfo.business_country === "IN" ? (
-                <select
-                  id={`${uid}-business-type`}
+                <Select
+                  inputId={`${uid}-business-type`}
                   required={complianceInfo.is_business}
-                  disabled={isFormDisabled}
+                  isDisabled={isFormDisabled}
                   aria-invalid={errorFieldNames.has("business_type")}
-                  value={complianceInfo.business_type || "Type"}
-                  onChange={(evt) => updateComplianceInfo({ business_type: evt.target.value })}
-                >
-                  <option disabled>Type</option>
-                  {indiaBusinessTypes.map((businessType) => (
-                    <option key={businessType.code} value={businessType.code}>
-                      {businessType.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Type"
+                  value={indiaBusinessTypeOptions.find((o) => o.id === complianceInfo.business_type) ?? null}
+                  onChange={handleStringChange((value) => updateComplianceInfo({ business_type: value }))}
+                  options={indiaBusinessTypeOptions}
+                />
               ) : complianceInfo.business_country === "CA" ? (
-                <select
-                  id={`${uid}-business-type`}
+                <Select
+                  inputId={`${uid}-business-type`}
                   required={complianceInfo.is_business}
-                  disabled={isFormDisabled}
+                  isDisabled={isFormDisabled}
                   aria-invalid={errorFieldNames.has("business_type")}
-                  value={complianceInfo.business_type || "Type"}
-                  onChange={(evt) => updateComplianceInfo({ business_type: evt.target.value })}
-                >
-                  <option disabled>Type</option>
-                  {canadaBusinessTypes.map((businessType) => (
-                    <option key={businessType.code} value={businessType.code}>
-                      {businessType.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Type"
+                  value={canadaBusinessTypeOptions.find((o) => o.id === complianceInfo.business_type) ?? null}
+                  onChange={handleStringChange((value) => updateComplianceInfo({ business_type: value }))}
+                  options={canadaBusinessTypeOptions}
+                />
               ) : (
-                <select
-                  id={`${uid}-business-type`}
-                  disabled={isFormDisabled}
-                  value={complianceInfo.business_type || "Type"}
+                <Select
+                  inputId={`${uid}-business-type`}
                   required
+                  isDisabled={isFormDisabled}
                   aria-invalid={errorFieldNames.has("business_type")}
-                  onChange={(evt) => updateComplianceInfo({ business_type: evt.target.value })}
-                >
-                  <option disabled>Type</option>
-                  <option value="llc">LLC</option>
-                  <option value="partnership">Partnership</option>
-                  <option value="profit">Non Profit</option>
-                  <option value="sole_proprietorship">Sole Proprietorship</option>
-                  <option value="corporation">Corporation</option>
-                </select>
+                  placeholder="Type"
+                  value={genericBusinessTypeOptions.find((o) => o.id === complianceInfo.business_type) ?? null}
+                  onChange={handleStringChange((value) => updateComplianceInfo({ business_type: value }))}
+                  options={genericBusinessTypeOptions}
+                />
               )}
             </fieldset>
           </div>
@@ -319,126 +402,96 @@ const AccountDetailsSection = ({
                 <legend>
                   <label htmlFor={`${uid}-business-state`}>State</label>
                 </legend>
-                <select
-                  id={`${uid}-business-state`}
+                <Select
+                  inputId={`${uid}-business-state`}
                   required={complianceInfo.is_business}
-                  disabled={isFormDisabled}
+                  isDisabled={isFormDisabled}
                   aria-invalid={errorFieldNames.has("business_state")}
-                  value={complianceInfo.business_state || "State"}
-                  onChange={(evt) => updateComplianceInfo({ business_state: evt.target.value })}
-                >
-                  <option disabled>State</option>
-                  {states.us.map((state) => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="State"
+                  value={usStateOptions.find((o) => o.id === complianceInfo.business_state) ?? null}
+                  onChange={handleStringChange((value) => updateComplianceInfo({ business_state: value }))}
+                  options={usStateOptions}
+                />
               </fieldset>
             ) : complianceInfo.business_country === "CA" ? (
               <fieldset className={cx({ danger: errorFieldNames.has("business_state") })}>
                 <legend>
                   <label htmlFor={`${uid}-business-province`}>Province</label>
                 </legend>
-                <select
-                  id={`${uid}-business-province`}
+                <Select
+                  inputId={`${uid}-business-province`}
                   required={complianceInfo.is_business}
-                  disabled={isFormDisabled}
+                  isDisabled={isFormDisabled}
                   aria-invalid={errorFieldNames.has("business_state")}
-                  value={complianceInfo.business_state || "Province"}
-                  onChange={(evt) => updateComplianceInfo({ business_state: evt.target.value })}
-                >
-                  <option disabled>Province</option>
-                  {states.ca.map((state) => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Province"
+                  value={caStateOptions.find((o) => o.id === complianceInfo.business_state) ?? null}
+                  onChange={handleStringChange((value) => updateComplianceInfo({ business_state: value }))}
+                  options={caStateOptions}
+                />
               </fieldset>
             ) : complianceInfo.business_country === "AU" ? (
               <fieldset className={cx({ danger: errorFieldNames.has("business_state") })}>
                 <legend>
                   <label htmlFor={`${uid}-business-state`}>State</label>
                 </legend>
-                <select
-                  id={`${uid}-business-state`}
+                <Select
+                  inputId={`${uid}-business-state`}
                   required={complianceInfo.is_business}
-                  disabled={isFormDisabled}
+                  isDisabled={isFormDisabled}
                   aria-invalid={errorFieldNames.has("business_state")}
-                  value={complianceInfo.business_state || "State"}
-                  onChange={(evt) => updateComplianceInfo({ business_state: evt.target.value })}
-                >
-                  <option disabled>State</option>
-                  {states.au.map((state) => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="State"
+                  value={auStateOptions.find((o) => o.id === complianceInfo.business_state) ?? null}
+                  onChange={handleStringChange((value) => updateComplianceInfo({ business_state: value }))}
+                  options={auStateOptions}
+                />
               </fieldset>
             ) : complianceInfo.business_country === "MX" ? (
               <fieldset className={cx({ danger: errorFieldNames.has("business_state") })}>
                 <legend>
                   <label htmlFor={`${uid}-business-state`}>State</label>
                 </legend>
-                <select
-                  id={`${uid}-business-state`}
+                <Select
+                  inputId={`${uid}-business-state`}
                   required={complianceInfo.is_business}
-                  disabled={isFormDisabled}
+                  isDisabled={isFormDisabled}
                   aria-invalid={errorFieldNames.has("business_state")}
-                  value={complianceInfo.business_state || "State"}
-                  onChange={(evt) => updateComplianceInfo({ business_state: evt.target.value })}
-                >
-                  <option disabled>State</option>
-                  {states.mx.map((state) => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="State"
+                  value={mxStateOptions.find((o) => o.id === complianceInfo.business_state) ?? null}
+                  onChange={handleStringChange((value) => updateComplianceInfo({ business_state: value }))}
+                  options={mxStateOptions}
+                />
               </fieldset>
             ) : complianceInfo.business_country === "AE" ? (
               <fieldset className={cx({ danger: errorFieldNames.has("business_state") })}>
                 <legend>
                   <label htmlFor={`${uid}-business-state`}>Province</label>
                 </legend>
-                <select
-                  id={`${uid}-business-state`}
+                <Select
+                  inputId={`${uid}-business-state`}
                   required={complianceInfo.is_business}
-                  disabled={isFormDisabled}
+                  isDisabled={isFormDisabled}
                   aria-invalid={errorFieldNames.has("business_state")}
-                  value={complianceInfo.business_state || "Province"}
-                  onChange={(evt) => updateComplianceInfo({ business_state: evt.target.value })}
-                >
-                  <option disabled>Province</option>
-                  {states.ae.map((state) => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Province"
+                  value={aeStateOptions.find((o) => o.id === complianceInfo.business_state) ?? null}
+                  onChange={handleStringChange((value) => updateComplianceInfo({ business_state: value }))}
+                  options={aeStateOptions}
+                />
               </fieldset>
             ) : complianceInfo.business_country === "IE" ? (
               <fieldset className={cx({ danger: errorFieldNames.has("business_state") })}>
                 <legend>
                   <label htmlFor={`${uid}-business-county`}>County</label>
                 </legend>
-                <select
-                  id={`${uid}-business-county`}
+                <Select
+                  inputId={`${uid}-business-county`}
                   required={complianceInfo.is_business}
-                  disabled={isFormDisabled}
+                  isDisabled={isFormDisabled}
                   aria-invalid={errorFieldNames.has("business_state")}
-                  value={complianceInfo.business_state || "County"}
-                  onChange={(evt) => updateComplianceInfo({ business_state: evt.target.value })}
-                >
-                  <option disabled>County</option>
-                  {states.ir.map((state) => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="County"
+                  value={ieStateOptions.find((o) => o.id === complianceInfo.business_state) ?? null}
+                  onChange={handleStringChange((value) => updateComplianceInfo({ business_state: value }))}
+                  options={ieStateOptions}
+                />
               </fieldset>
             ) : null}
             <fieldset className={cx({ danger: errorFieldNames.has("business_zip_code") })}>
@@ -462,19 +515,14 @@ const AccountDetailsSection = ({
             <legend>
               <label htmlFor={`${uid}-business-country`}>Country</label>
             </legend>
-            <select
-              id={`${uid}-business-country`}
-              value={complianceInfo.business_country || ""}
-              disabled={isFormDisabled}
+            <Select
+              inputId={`${uid}-business-country`}
               required={complianceInfo.is_business}
-              onChange={(evt) => updateComplianceInfo({ updated_country_code: evt.target.value })}
-            >
-              {Object.entries(countries).map(([code, name]) => (
-                <option key={code} value={code}>
-                  {name}
-                </option>
-              ))}
-            </select>
+              isDisabled={isFormDisabled}
+              value={countryOptions.find((o) => o.id === complianceInfo.business_country) ?? null}
+              onChange={handleStringChange((value) => updateComplianceInfo({ updated_country_code: value }))}
+              options={countryOptions}
+            />
           </fieldset>
           <fieldset className={cx({ danger: errorFieldNames.has("business_phone") })}>
             <legend>
@@ -842,147 +890,112 @@ const AccountDetailsSection = ({
             <legend>
               <label htmlFor={`${uid}-creator-state`}>State</label>
             </legend>
-            <select
-              id={`${uid}-creator-state`}
+            <Select
+              inputId={`${uid}-creator-state`}
               required
-              disabled={isFormDisabled}
+              isDisabled={isFormDisabled}
               aria-invalid={errorFieldNames.has("state")}
-              value={complianceInfo.state || "State"}
-              onChange={(evt) => updateComplianceInfo({ state: evt.target.value })}
-            >
-              <option disabled>State</option>
-              {states.us.map((state) => (
-                <option key={state.code} value={state.code}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
+              placeholder="State"
+              value={usStateOptions.find((o) => o.id === complianceInfo.state) ?? null}
+              onChange={handleStringChange((value) => updateComplianceInfo({ state: value }))}
+              options={usStateOptions}
+            />
           </fieldset>
         ) : complianceInfo.country === "CA" ? (
           <fieldset className={cx({ danger: errorFieldNames.has("state") })}>
             <legend>
               <label htmlFor={`${uid}-creator-province`}>Province</label>
             </legend>
-            <select
-              id={`${uid}-creator-province`}
+            <Select
+              inputId={`${uid}-creator-province`}
               required
-              disabled={isFormDisabled}
+              isDisabled={isFormDisabled}
               aria-invalid={errorFieldNames.has("state")}
-              value={complianceInfo.state || "Province"}
-              onChange={(evt) => updateComplianceInfo({ state: evt.target.value })}
-            >
-              <option disabled>Province</option>
-              {states.ca.map((state) => (
-                <option key={state.code} value={state.code}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Province"
+              value={caStateOptions.find((o) => o.id === complianceInfo.state) ?? null}
+              onChange={handleStringChange((value) => updateComplianceInfo({ state: value }))}
+              options={caStateOptions}
+            />
           </fieldset>
         ) : complianceInfo.country === "AU" ? (
           <fieldset className={cx({ danger: errorFieldNames.has("state") })}>
             <legend>
               <label htmlFor={`${uid}-creator-state`}>State</label>
             </legend>
-            <select
-              id={`${uid}-creator-state`}
+            <Select
+              inputId={`${uid}-creator-state`}
               required
-              disabled={isFormDisabled}
+              isDisabled={isFormDisabled}
               aria-invalid={errorFieldNames.has("state")}
-              value={complianceInfo.state || "State"}
-              onChange={(evt) => updateComplianceInfo({ state: evt.target.value })}
-            >
-              <option disabled>State</option>
-              {states.au.map((state) => (
-                <option key={state.code} value={state.code}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
+              placeholder="State"
+              value={auStateOptions.find((o) => o.id === complianceInfo.state) ?? null}
+              onChange={handleStringChange((value) => updateComplianceInfo({ state: value }))}
+              options={auStateOptions}
+            />
           </fieldset>
         ) : complianceInfo.country === "MX" ? (
           <fieldset className={cx({ danger: errorFieldNames.has("state") })}>
             <legend>
               <label htmlFor={`${uid}-creator-state`}>State</label>
             </legend>
-            <select
-              id={`${uid}-creator-state`}
+            <Select
+              inputId={`${uid}-creator-state`}
               required
-              disabled={isFormDisabled}
+              isDisabled={isFormDisabled}
               aria-invalid={errorFieldNames.has("state")}
-              value={complianceInfo.state || "State"}
-              onChange={(evt) => updateComplianceInfo({ state: evt.target.value })}
-            >
-              <option disabled>State</option>
-              {states.mx.map((state) => (
-                <option key={state.code} value={state.code}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
+              placeholder="State"
+              value={mxStateOptions.find((o) => o.id === complianceInfo.state) ?? null}
+              onChange={handleStringChange((value) => updateComplianceInfo({ state: value }))}
+              options={mxStateOptions}
+            />
           </fieldset>
         ) : complianceInfo.country === "AE" ? (
           <fieldset className={cx({ danger: errorFieldNames.has("state") })}>
             <legend>
               <label htmlFor={`${uid}-creator-province`}>Province</label>
             </legend>
-            <select
-              id={`${uid}-creator-province`}
+            <Select
+              inputId={`${uid}-creator-province`}
               required
-              disabled={isFormDisabled}
+              isDisabled={isFormDisabled}
               aria-invalid={errorFieldNames.has("state")}
-              value={complianceInfo.state || "Province"}
-              onChange={(evt) => updateComplianceInfo({ state: evt.target.value })}
-            >
-              <option disabled>Province</option>
-              {states.ae.map((state) => (
-                <option key={state.code} value={state.code}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Province"
+              value={aeStateOptions.find((o) => o.id === complianceInfo.state) ?? null}
+              onChange={handleStringChange((value) => updateComplianceInfo({ state: value }))}
+              options={aeStateOptions}
+            />
           </fieldset>
         ) : complianceInfo.country === "IE" ? (
           <fieldset className={cx({ danger: errorFieldNames.has("state") })}>
             <legend>
               <label htmlFor={`${uid}-creator-county`}>County</label>
             </legend>
-            <select
-              id={`${uid}-creator-county`}
+            <Select
+              inputId={`${uid}-creator-county`}
               required
-              disabled={isFormDisabled}
+              isDisabled={isFormDisabled}
               aria-invalid={errorFieldNames.has("state")}
-              value={complianceInfo.state || "County"}
-              onChange={(evt) => updateComplianceInfo({ state: evt.target.value })}
-            >
-              <option disabled>County</option>
-              {states.ir.map((state) => (
-                <option key={state.code} value={state.code}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
+              placeholder="County"
+              value={ieStateOptions.find((o) => o.id === complianceInfo.state) ?? null}
+              onChange={handleStringChange((value) => updateComplianceInfo({ state: value }))}
+              options={ieStateOptions}
+            />
           </fieldset>
         ) : complianceInfo.country === "BR" ? (
           <fieldset className={cx({ danger: errorFieldNames.has("state") })}>
             <legend>
               <label htmlFor={`${uid}-creator-state`}>State</label>
             </legend>
-            <select
-              id={`${uid}-creator-state`}
+            <Select
+              inputId={`${uid}-creator-state`}
               required
-              disabled={isFormDisabled}
+              isDisabled={isFormDisabled}
               aria-invalid={errorFieldNames.has("state")}
-              value={complianceInfo.state || "State"}
-              onChange={(evt) => updateComplianceInfo({ state: evt.target.value })}
-            >
-              <option disabled>State</option>
-              {states.br.map((state) => (
-                <option key={state.code} value={state.code}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
+              placeholder="State"
+              value={brStateOptions.find((o) => o.id === complianceInfo.state) ?? null}
+              onChange={handleStringChange((value) => updateComplianceInfo({ state: value }))}
+              options={brStateOptions}
+            />
           </fieldset>
         ) : null}
         <fieldset className={cx({ danger: errorFieldNames.has("zip_code") })}>
@@ -1007,22 +1020,19 @@ const AccountDetailsSection = ({
         <legend>
           <label htmlFor={`${uid}-creator-country`}>Country</label>
         </legend>
-        <select
-          id={`${uid}-creator-country`}
-          disabled={isFormDisabled}
-          value={complianceInfo.country || ""}
-          onChange={(evt) =>
-            updateComplianceInfo(
-              complianceInfo.is_business ? { country: evt.target.value } : { updated_country_code: evt.target.value },
-            )
-          }
-        >
-          {Object.entries(countries).map(([code, name]) => (
-            <option key={code} value={code}>
-              {name}
-            </option>
-          ))}
-        </select>
+        <Select
+          inputId={`${uid}-creator-country`}
+          isDisabled={isFormDisabled}
+          value={countryOptions.find((o) => o.id === complianceInfo.country) ?? null}
+          onChange={handleStringChange((value) => {
+            if (complianceInfo.is_business) {
+              updateComplianceInfo({ country: value });
+            } else {
+              updateComplianceInfo({ updated_country_code: value });
+            }
+          })}
+          options={countryOptions}
+        />
       </fieldset>
       <fieldset className={cx({ danger: errorFieldNames.has("phone") })}>
         <legend>
@@ -1048,61 +1058,46 @@ const AccountDetailsSection = ({
         </legend>
         <div style={{ display: "grid", gap: "var(--spacer-5)", gridAutoFlow: "column", gridAutoColumns: "1fr" }}>
           <fieldset className={cx({ danger: errorFieldNames.has("dob_month") })}>
-            <select
-              id={`${uid}-creator-dob-month`}
-              disabled={isFormDisabled}
+            <Select
+              inputId={`${uid}-creator-dob-month`}
+              isDisabled={isFormDisabled}
               required
               aria-label="Month"
               aria-invalid={errorFieldNames.has("dob_month")}
-              value={complianceInfo.dob_month || "Month"}
-              onChange={(evt) => updateComplianceInfo({ dob_month: Number(evt.target.value) })}
-            >
-              <option disabled>Month</option>
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                <option key={month} value={month}>
-                  {month}
-                </option>
-              ))}
-            </select>
+              placeholder="Month"
+              value={monthOptions.find((o) => o.id === String(complianceInfo.dob_month)) ?? null}
+              onChange={handleNumericChange((value) => updateComplianceInfo({ dob_month: value }))}
+              options={monthOptions}
+            />
           </fieldset>
           <fieldset
             style={complianceInfo.country !== "US" ? { gridRow: 1, gridColumn: 1 } : {}}
             className={cx({ danger: errorFieldNames.has("dob_day") })}
           >
-            <select
-              id={`${uid}-creator-dob-day`}
-              disabled={isFormDisabled}
+            <Select
+              inputId={`${uid}-creator-dob-day`}
+              isDisabled={isFormDisabled}
               required
               aria-label="Day"
               aria-invalid={errorFieldNames.has("dob_day")}
-              value={complianceInfo.dob_day || "Day"}
-              onChange={(evt) => updateComplianceInfo({ dob_day: Number(evt.target.value) })}
-            >
-              <option disabled>Day</option>
-              {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                <option key={day} value={day}>
-                  {day}
-                </option>
-              ))}
-            </select>
+              placeholder="Day"
+              value={dayOptions.find((o) => o.id === String(complianceInfo.dob_day)) ?? null}
+              onChange={handleNumericChange((value) => updateComplianceInfo({ dob_day: value }))}
+              options={dayOptions}
+            />
           </fieldset>
           <fieldset className={cx({ danger: errorFieldNames.has("dob_year") })}>
-            <select
-              id={`${uid}-creator-dob-year`}
-              disabled={isFormDisabled}
+            <Select
+              inputId={`${uid}-creator-dob-year`}
+              isDisabled={isFormDisabled}
               required
               aria-label="Year"
               aria-invalid={errorFieldNames.has("dob_year")}
-              value={complianceInfo.dob_year || "Year"}
-              onChange={(evt) => updateComplianceInfo({ dob_year: Number(evt.target.value) })}
-            >
-              <option disabled>Year</option>
-              {Array.from({ length: minDobYear - 1900 }, (_, i) => i + 1900).map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
+              placeholder="Year"
+              value={yearOptions.find((o) => o.id === String(complianceInfo.dob_year)) ?? null}
+              onChange={handleNumericChange((value) => updateComplianceInfo({ dob_year: value }))}
+              options={yearOptions}
+            />
           </fieldset>
         </div>
       </fieldset>
@@ -1115,20 +1110,15 @@ const AccountDetailsSection = ({
             <label htmlFor={`${uid}-nationality`}>Nationality</label>
           </legend>
           <div>
-            <select
-              id={`${uid}-nationality`}
-              disabled={isFormDisabled}
+            <Select
+              inputId={`${uid}-nationality`}
+              isDisabled={isFormDisabled}
               aria-invalid={errorFieldNames.has("nationality")}
-              value={complianceInfo.nationality || "Nationality"}
-              onChange={(evt) => updateComplianceInfo({ nationality: evt.target.value })}
-            >
-              <option disabled>Nationality</option>
-              {Object.entries(countries).map(([code, name]) => (
-                <option key={code} value={code}>
-                  {name}
-                </option>
-              ))}
-            </select>
+              placeholder="Nationality"
+              value={countryOptions.find((o) => o.id === complianceInfo.nationality) ?? null}
+              onChange={handleStringChange((value) => updateComplianceInfo({ nationality: value }))}
+              options={countryOptions}
+            />
           </div>
         </fieldset>
       ) : null}

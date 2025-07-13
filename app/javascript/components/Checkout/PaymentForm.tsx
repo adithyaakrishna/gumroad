@@ -53,6 +53,7 @@ import { Icon } from "$app/components/Icons";
 import { useLoggedInUser } from "$app/components/LoggedInUser";
 import { PriceInput } from "$app/components/PriceInput";
 import { Progress } from "$app/components/Progress";
+import { Select, Option } from "$app/components/Select";
 import { showAlert } from "$app/components/server-components/Alert";
 import { useIsDarkTheme } from "$app/components/useIsDarkTheme";
 import { useOnChangeSync } from "$app/components/useOnChange";
@@ -80,31 +81,45 @@ const CountryInput = () => {
     }
   }, [state.country, shippingCountryCodes]);
 
+  const countryOptions: Option[] = React.useMemo(() => {
+    const countryCodes = shippingCountryCodes.size > 0 ? [...shippingCountryCodes] : Object.keys(state.countries);
+    return countryCodes
+      .filter((countryCode) => state.countries[countryCode])
+      .map((countryCode) => ({
+        id: countryCode,
+        label: state.countries[countryCode] || "",
+      }));
+  }, [shippingCountryCodes, state.countries]);
+
+  const selectedCountryOption = countryOptions.find((option) => option.id === state.country) || null;
+
   return (
     <fieldset>
       <legend>
-        <label htmlFor={`${uid}country`}>Country</label>
+        <label htmlFor={`${uid}country`}>Countri</label>
       </legend>
-      <select
-        id={`${uid}country`}
-        value={state.country}
-        onChange={(e) =>
-          dispatch({
-            type: "set-value",
-            country: e.target.value,
-            state: e.target.value === "CA" ? state.caProvinces[0] : state.state,
-          })
-        }
-        disabled={isProcessing(state)}
-      >
-        {(shippingCountryCodes.size > 0 ? [...shippingCountryCodes] : Object.keys(state.countries)).map(
-          (countryCode) => (
-            <option key={state.countries[countryCode]} value={countryCode}>
-              {state.countries[countryCode]}
-            </option>
-          ),
-        )}
-      </select>
+      <Select
+        inputId={`${uid}country`}
+        value={selectedCountryOption}
+        onChange={(selectedOption) => {
+          if (selectedOption && !Array.isArray(selectedOption)) {
+            dispatch({
+              type: "set-value",
+              country: selectedOption.id,
+              state: selectedOption.id === "CA" ? state.caProvinces[0] : state.state,
+            });
+          }
+        }}
+        options={countryOptions}
+        isDisabled={isProcessing(state)}
+        placeholder="Search for a country..."
+        isClearable={false}
+        isSearchable
+        isMulti={false}
+        menuPosition="absolute"
+        menuShouldBlockScroll={false}
+        maxMenuHeight={200}
+      />
     </fieldset>
   );
 };
@@ -133,24 +148,40 @@ const StateInput = () => {
       break;
   }
 
+  const stateOptions: Option[] | null = React.useMemo(() => {
+    if (!states) return null;
+    return states.map((stateName) => ({
+      id: stateName,
+      label: stateName,
+    }));
+  }, [states]);
+
+  const selectedStateOption = stateOptions?.find((option) => option.id === state.state) || null;
+
   return (
     <fieldset className={cx({ danger: errors.has("state") })}>
       <legend>
         <label htmlFor={`${uid}state`}>{stateLabel}</label>
       </legend>
-      {(state.country === "US" || state.country === "CA") && states !== null ? (
-        <select
-          id={`${uid}state`}
-          value={state.state}
-          onChange={(e) => dispatch({ type: "set-value", state: e.target.value })}
-          disabled={isProcessing(state)}
-        >
-          {states.map((state) => (
-            <option key={state} value={state}>
-              {state}
-            </option>
-          ))}
-        </select>
+      {(state.country === "US" || state.country === "CA") && stateOptions !== null ? (
+        <Select
+          inputId={`${uid}state`}
+          value={selectedStateOption}
+          onChange={(selectedOption) => {
+            if (selectedOption && !Array.isArray(selectedOption)) {
+              dispatch({ type: "set-value", state: selectedOption.id });
+            }
+          }}
+          options={stateOptions}
+          isDisabled={isProcessing(state)}
+          placeholder={`Search for a ${stateLabel.toLowerCase()}...`}
+          isClearable={false}
+          isSearchable
+          isMulti={false}
+          menuPosition="absolute"
+          menuShouldBlockScroll={false}
+          maxMenuHeight={200}
+        />
       ) : (
         <input
           id={`${uid}state`}
