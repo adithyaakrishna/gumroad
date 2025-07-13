@@ -528,7 +528,7 @@ describe SettingsPresenter do
           au: Compliance::Countries.subdivisions_for_select(Compliance::Countries::AUS.alpha2).map { |code, name| { code:, name: } },
           mx: Compliance::Countries.subdivisions_for_select(Compliance::Countries::MEX.alpha2).map { |code, name| { code:, name: } },
           ae: Compliance::Countries.subdivisions_for_select(Compliance::Countries::ARE.alpha2).map { |code, name| { code:, name: } },
-          ir: Compliance::Countries.subdivisions_for_select(Compliance::Countries::IRL.alpha2).map { |code, name| { code:, name: } },
+          ie: Compliance::Countries.subdivisions_for_select(Compliance::Countries::IRL.alpha2).map { |code, name| { code:, name: } },
           br: Compliance::Countries.subdivisions_for_select(Compliance::Countries::BRA.alpha2).map { |code, name| { code:, name: } },
         },
         saved_card: nil,

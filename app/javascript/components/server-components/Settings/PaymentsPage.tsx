@@ -138,7 +138,7 @@ type Props = {
     au: { code: string; name: string }[];
     mx: { code: string; name: string }[];
     ae: { code: string; name: string }[];
-    ir: { code: string; name: string }[];
+    ie: { code: string; name: string }[];
     br: { code: string; name: string }[];
   };
   saved_card: SavedCreditCard | null;

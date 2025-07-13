@@ -43,7 +43,7 @@ const AccountDetailsSection = ({
     au: { code: string; name: string }[];
     mx: { code: string; name: string }[];
     ae: { code: string; name: string }[];
-    ir: { code: string; name: string }[];
+    ie: { code: string; name: string }[];
     br: { code: string; name: string }[];
   };
   errorFieldNames: Set<FormFieldName>;
@@ -124,8 +124,8 @@ const AccountDetailsSection = ({
   );
 
   const ieStateOptions: Option[] = React.useMemo(
-    () => states.ir.map((s) => ({ id: s.code, label: s.name })),
-    [states.ir],
+    () => states.ie.map((s) => ({ id: s.code, label: s.name })),
+    [states.ie],
   );
 
   const brStateOptions: Option[] = React.useMemo(
